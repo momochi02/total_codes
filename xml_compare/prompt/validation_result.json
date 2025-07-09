@@ -1,0 +1,19 @@
+{
+  "Overall_Validation_Result": "FAIL",
+  "Discrepancy Log": {
+    "major": [
+      {
+        "title": "Bounds Mismatch",
+        "description": [
+          "Tablet bounds: (100, 300, 900, 451)",
+          "Phone bounds: (100, 300, 900, 400)"
+        ],
+        "path": [
+          "/UnknownClass[0]/android.widget.FrameLayout[0]/android.widget.Button[2]"
+        ]
+      }
+    ],
+    "critical": []
+  },
+  "conclusion": "Validation FAILED due to structural or bounds mismatches."
+}
