@@ -7,7 +7,7 @@ import os
 import requests
 import json
 import datetime
-
+from fastapi.responses import Response
 load_dotenv()
 
 REAL_API_KEY = os.getenv("REAL_API_KEY")
@@ -101,7 +101,9 @@ async def proxy_chat(request: Request, body: ChatRequest, authorization: Optiona
         llm_id = response.json()[0]['modelId']  # The first model ID that can be inquired.
         print(f"llm_id: {llm_id}")
     except Exception as e:
-        return JSONResponse(content={"error": f"Không thể lấy modelId: {str(e)}"}, status_code=500)
+        # from fastapi.responses import Response
+
+        return Response(content=f"Không thể lấy modelId: {str(e)}", media_type="text/plain", status_code=500)
         # llmId = 330
 
     # --- Gọi API model ---
@@ -124,7 +126,7 @@ async def proxy_chat(request: Request, body: ChatRequest, authorization: Optiona
 
     try:
 
-        response: requests.Response = requests.post(_apim_host_url + _apim_endpoint_chat_url, json=body,
+        response: requests.Response = requests.post(_apim_host_url + _apim_endpoint_chat_url, json=payload,
                                                     headers=headers)
         response.raise_for_status()
         ai_result = response.json()
