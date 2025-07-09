@@ -56,9 +56,10 @@ def update_usage_stats(key):
     with open(USAGE_FILE, "w") as f:
         json.dump(stats, f, indent=2)
 
-@app.post("/v1/chat/completions")
+
+@app.post("/v1/chat_gauss/completions")
 async def proxy_chat(request: Request, body: ChatRequest, authorization: Optional[str] = Header(None)):
-    # --- Auth check ---
+    # --- Check API key ---
     if not authorization or not authorization.startswith("Bearer "):
         return JSONResponse(content={"error": "Missing or invalid Authorization header"}, status_code=401)
 
@@ -69,37 +70,90 @@ async def proxy_chat(request: Request, body: ChatRequest, authorization: Optiona
     client_name = API_KEYS[api_key]
     client_ip = request.client.host
 
-    # --- Relay to real API ---
-    headers = {
-        "Authorization": f"Bearer {REAL_API_KEY}",
-        "Content-Type": "application/json"
-    }
+    # --- Lấy prompt ---
+    user_prompt = body.messages[-1].content if body.messages else ""
 
+    # --- Lấy LLM model ID ---
+
+    _apim_host_url = "https://fabrix"
+    _apim_openapi_key = "Bearer 1234sdfsf"
+    _apim_generative_key = "xpZW50U2V"
+    _apim_endpoint_model_url = "/openapi/chat/v1/models"
+    _apim_endpoint_chat_url = "/openapi/chat/v1/messages"
+    _apim_ad_id = "chi.dtp@samsung.com"
+    try:
+        # headers = {
+        #     "x-openapi-token": "Bearer 1234sdfsf",
+        #     "x-generative-ai-client": "xpZW50U2V",
+        #     "x-generative-ai-user-email": "ch@gmail.com",
+        #     "Content-Type": "application/json"
+        # }
+
+        headers: dict = {
+            'x-openapi-token': _apim_openapi_key,
+            'x-generative-ai-client': _apim_generative_key,
+            'x-generative-ai-user-email': _apim_ad_id,
+            'Content-Type': 'application/json'
+        }
+        response: requests.Response = requests.get(_apim_host_url + _apim_endpoint_model_url,
+                                                   headers=headers)
+        print("1. Get LLM Model Response", response.json())
+        llm_id = response.json()[0]['modelId']  # The first model ID that can be inquired.
+        print(f"llm_id: {llm_id}")
+    except Exception as e:
+        return JSONResponse(content={"error": f"Không thể lấy modelId: {str(e)}"}, status_code=500)
+        # llmId = 330
+
+    # --- Gọi API model ---
     payload = {
-        "model": body.model,
-        "messages": [msg.dict() for msg in body.messages],
-        "temperature": body.temperature,
-        "top_p": body.top_p,
-        "max_tokens": body.max_tokens,
-        "stream": body.stream
+        "llmId": llm_id,
+        "contents": [user_prompt],
+        "llmConfig": {
+            "do_sample": True,
+            "max_new_tokens": body.max_tokens or 1024,
+            "return_full_text": False,
+            "top_k": 14,
+            "top_p": body.top_p or 0.94,
+            "temperature": body.temperature or 0.4,
+            "repetition_penalty": 1.04,
+            "decoder_input_details": False,
+            "details": False
+        },
+        "isStream": body.stream or False
     }
 
     try:
-        response = requests.post(
-            f"{REAL_API_BASE}/chat/completions",
-            headers=headers,
-            json=payload
-        )
-        response.raise_for_status()
-        data = response.json()
 
-        # --- Log and update ---
-        user_prompt = body.messages[-1].content
-        model_response = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+        response: requests.Response = requests.post(_apim_host_url + _apim_endpoint_chat_url, json=body,
+                                                    headers=headers)
+        response.raise_for_status()
+        ai_result = response.json()
+        model_response = ai_result.get('content', '')
+
         log_access_to_file(client_ip, api_key, client_name, user_prompt, model_response)
         update_usage_stats(api_key)
 
-        return JSONResponse(content=data)
-
-    except requests.exceptions.RequestException as e:
+        # Trả về định dạng OpenAI-compatible
+        return {
+            "id": "chatcmpl-fakeid123",
+            "object": "chat.completion",
+            "created": int(datetime.datetime.now().timestamp()),
+            "model": body.model,
+            "choices": [
+                {
+                    "index": 0,
+                    "message": {
+                        "role": "assistant",
+                        "content": model_response
+                    },
+                    "finish_reason": "stop"
+                }
+            ],
+            "usage": {
+                "prompt_tokens": 0,
+                "completion_tokens": 0,
+                "total_tokens": 0
+            }
+        }
+    except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)

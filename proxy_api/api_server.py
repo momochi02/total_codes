@@ -93,66 +93,51 @@ def track_key_usage_and_check_limit(key):
 def redirect_to_docs():
     return RedirectResponse(url="/docs")
 
-@app.post("/chats")
-async def proxy_chat(
+@app.post("/compare_xml_by_gauss")
+async def compare_xml_by_gauss(
     request: Request,
-    data: PromptInput,
+    tablet_xml: Annotated[UploadFile, File(..., description="Tablet XML file")],
+    phone_xml: Annotated[UploadFile, File(..., description="Phone XML file")],
     x_api_key: Optional[str] = Header(None)
 ):
-#     # Check API key
+    # ✅ Check API key
     if x_api_key not in API_KEYS:
-        raise HTTPException(status_code=403, detail="Forbidden: Invalid API key")
+        print('Forbidden: Invalid API key')
+        raise HTTPException(status_code=403, detail="❌ Forbidden: Invalid API key")
 
-    # Ghi log IP và key
-    client_ip = request.client.host
     user_name = API_KEYS[x_api_key]
-
-    log_access_to_file(user_name, x_api_key, client_ip, data.prompt)
+    client_ip = request.client.host
+    print(user_name)
+    print(client_ip)
+    log_access_to_file(user_name, x_api_key, client_ip, "[COMPARE_XML_BY_GAUSS]")
     track_key_usage_and_check_limit(x_api_key)
-    # Gọi model nội bộ
 
+    # ✅ Kiểm tra định dạng file XML
+    if not (tablet_xml.filename.endswith(".xml") and phone_xml.filename.endswith(".xml")):
+        raise HTTPException(status_code=400, detail="❌ Cả 2 file phải có đuôi .xml")
+
+    # ✅ Đọc nội dung file
     try:
-        # response = requests.post(
-        #     f"{REAL_API_BASE}/chat/completions",  # API model thực
-        #     json={
-        #         "model": "gpt2",  # Hoặc tên model thật
-        #         "messages": [{"role": "user", "content": data.prompt}]
-        #     }
-        # )
-        # # result = response.json()
-        # # Giả lập phản hồi thay vì gọi model
-        # result = {
-        #     "choices": [
-        #         {
-        #             "message": {
-        #                 "role": "assistant",
-        #                 "content": f"Chào {user_name}, bạn vừa hỏi: '{data.prompt}'"
-        #             }
-        #         }
-        #     ]
-        # }
-
-        response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": "Bearer YOUR_API_KEY",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model": "openai/gpt-3.5-turbo",  # hoặc anthropic/claude-3-sonnet, meta-llama/llama-3-70b-instruct,...
-                "messages": [
-                    {"role": "user", "content": "Viết 1 bài thơ 4 câu về Hà Nội"}
-                ]
-            }
-        )
-        result = response.json()
-        return {
-            "user": user_name,
-            "ip": client_ip,
-            "response": result
-        }
+        tablet_content = (await tablet_xml.read()).decode("utf-8")
+        phone_content = (await phone_xml.read()).decode("utf-8")
     except Exception as e:
-        return {"error": str(e)}
+        raise HTTPException(status_code=400, detail=f"❌ Không thể đọc file: {str(e)}")
+
+    print("Tablet XML snippet: >>>", repr(tablet_content[:300]), "<<<")
+    print("Phone XML snippet: >>>", repr(phone_content[:300]), "<<<")
+
+    # ✅ Gọi hàm xử lý AI
+    try:
+        result = compare_xml_with_prompt.compare_xml_with_prompt(tablet_content, phone_content)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"❌ Lỗi xử lý AI: {str(e)}")
+
+    # ✅ Kiểm tra kết quả hợp lệ
+    if not isinstance(result, dict):
+        raise HTTPException(status_code=500, detail="❌ Kết quả không hợp lệ từ model.")
+
+    return JSONResponse(content=result)
+
 
 
 @app.post("/compare_xml")

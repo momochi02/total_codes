@@ -5,6 +5,7 @@ def call_compare_api(tablet_xml_path, phone_xml_path, api_url="http://localhost:
         'tablet_xml': open(tablet_xml_path, 'rb'),
         'phone_xml': open(phone_xml_path, 'rb')
     }
+
     try:
         response = requests.post(api_url, files=files)
         response.raise_for_status()  # nếu status != 200 thì raise lỗi

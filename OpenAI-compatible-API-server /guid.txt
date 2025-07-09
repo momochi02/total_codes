@@ -1,1 +1,10 @@
 uvicorn proxy_api:app --host 0.0.0.0 --port 8000
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+ipconfig   # trên Windows
+ifconfig   # trên Mac/Linux
+
+
+
+pip install fastapi uvicorn python-dotenv pydantic requests
+
