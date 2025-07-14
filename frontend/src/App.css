@@ -1,0 +1,21 @@
+.App {
+  max-width: 600px;
+  margin: 50px auto;
+  font-family: sans-serif;
+}
+
+input[type="file"] {
+  margin: 10px 0;
+}
+
+button {
+  padding: 10px 20px;
+  font-weight: bold;
+}
+
+.result {
+  margin-top: 20px;
+  background: #f7f7f7;
+  padding: 10px;
+  border: 1px solid #ccc;
+}

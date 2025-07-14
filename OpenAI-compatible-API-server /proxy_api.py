@@ -102,7 +102,8 @@ async def proxy_chat(request: Request, body: ChatRequest, authorization: Optiona
         print(f"llm_id: {llm_id}")
     except Exception as e:
         # from fastapi.responses import Response
-
+        # log_access_to_file(client_ip, api_key, client_name, user_prompt, str(e))
+        # update_usage_stats(api_key)
         return Response(content=f"Không thể lấy modelId: {str(e)}", media_type="text/plain", status_code=500)
         # llmId = 330
 

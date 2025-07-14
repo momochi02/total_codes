@@ -1,0 +1,51 @@
+.result-container {
+  margin-top: 20px;
+}
+
+.result-section {
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  position: relative;
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.result-title {
+  color: #2c3e50;
+  margin: 0;
+  font-weight: bold;
+}
+
+.copy-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #007bff;
+}
+
+.copy-status {
+  color: green;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.result-pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  background-color: #eef;
+  padding: 10px;
+  border-radius: 5px;
+  max-height: 300px;
+  overflow: auto;
+  margin-top: 10px;
+  font-family: monospace;
+  font-size: 14px;
+}

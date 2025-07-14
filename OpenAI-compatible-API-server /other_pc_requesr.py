@@ -1,8 +1,12 @@
 from openai import OpenAI
-
+from openai._base_client import AsyncHTTPTransport
 client = OpenAI(
     base_url="http://YOUR_PC_IP:8000/v1",  # ví dụ 192.168.1.10
-    api_key="key_pc1"
+    api_key="key_pc1",
+    http_client=AsyncHTTPTransport(
+            timeout=30,
+            max_retries=0  # <- tắt retry
+        )
 )
 
 response = client.chat.completions.create(
