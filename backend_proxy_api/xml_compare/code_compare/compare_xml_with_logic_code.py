@@ -1,3 +1,4 @@
+import time
 import xml.etree.ElementTree as ET
 import json
 import re
@@ -124,6 +125,7 @@ def compare_xml_lgcode(tablet_xml_str, phone_xml_str):
     p_nodes = flatten_tree(p_root)
 
     discrepancies = compare_nodes(t_nodes, p_nodes)
+    time.sleep(10)
     result = {
         "Overall_Validation_Result": "FAIL" if discrepancies['critical'] or discrepancies['major'] else "PASS",
         "Discrepancy Log": discrepancies,

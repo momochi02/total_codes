@@ -1,20 +1,22 @@
 import React, { useState } from "react";
 import axios from "axios";
 import FileUpload from "../components/FilesUpdate/FileUploadForm";
-import ResultBox from "../components/ResultBoxs/ResultBox";
+// import ResultBox from "../components/ResultBoxs/ResultBox";
 import Testrs from "../components/ResultBoxs/Testrs";
 function Compare() {
   const [result, setResult] = useState(null);
+   const [loading, setLoading] = useState(false);
 
   const handleCompare = async (tabletXml, phoneXml, prompt_txt = null, apiType = "gauss") => {
+    setLoading(true);
     const makeFormData = () => {
-      const fd = new FormData();
-      fd.append("tablet_xml", tabletXml);
-      fd.append("phone_xml", phoneXml);
-      if (prompt_txt instanceof File) {
-        fd.append("prompt_txt", prompt_txt);
-      }
-      return fd;
+          const fd = new FormData();
+          fd.append("tablet_xml", tabletXml);
+          fd.append("phone_xml", phoneXml);
+          if (prompt_txt instanceof File) {
+            fd.append("prompt_txt", prompt_txt);
+          }
+          return fd;
     };
     console.log("📤 tabletXml:", tabletXml?.name);
     console.log("📤 phoneXml:", phoneXml?.name);
@@ -74,12 +76,16 @@ function Compare() {
 
       setResult({ error: "Lỗi khi gửi file hoặc từ server." });
     }
+ finally {
+    setLoading(false); // 🔁 QUAN TRỌNG: dừng loading khi xong
+  }
   };
 
   return (
     <div>
       <h2>📄 So sánh XML</h2>
-      <FileUpload onCompare={handleCompare} />
+      <FileUpload onCompare={handleCompare} loading={loading} />
+{/*       <FileUpload onCompare={handleCompare} /> */}
 {/*      <ResultBox result={result} /> */}
       <Testrs result={result} />
     </div>

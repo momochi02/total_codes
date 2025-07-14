@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "./FileUploadForm_css.css"; // ✅ Nhúng CSS riêng
 
-function FileUploadForm({ onCompare }) {
+function FileUploadForm({ onCompare,loading }) {
   const [tabletFile, setTabletFile] = useState(null);
   const [phoneFile, setPhoneFile] = useState(null);
+//      const [PromptFile, setPromptFile] = useState(null);
 
   const [promptContent, setPromptContent] = useState("");
   const [promptFileName, setPromptFileName] = useState("");
@@ -30,6 +31,13 @@ function FileUploadForm({ onCompare }) {
     };
     reader.readAsText(file);
   };
+
+    const handleClearPrompt = () => {
+      localStorage.removeItem("promptContent");
+      localStorage.removeItem("promptFileName");
+      setPromptContent("");
+      setPromptFileName("");
+    };
 
   const handleSubmit = (apiType) => {
     if (!tabletFile || !phoneFile) {
@@ -62,21 +70,42 @@ function FileUploadForm({ onCompare }) {
         {phoneFile && <label className="selected-file">📄 {phoneFile.name}</label>}
       </div>
 
-      <div>
-        <label>📝 File Prompt TXT:</label>
-        <input
-          type="file"
-          accept=".txt"
-          onChange={(e) =>
-            handleFileChange(e, setPromptContent, setPromptFileName, "prompt")
-          }
-        />
-               {promptFileName && <label  className="selected-file">📄 {promptFileName} </label>}
-      </div>
 
-      <button className="compare-xml" onClick={() => handleSubmit("twoAPI_2")}>
-        🚀 Ananazy
-      </button>
+       <div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <label>📝 File Prompt TXT:</label>
+            <input
+              type="file"
+              accept=".txt"
+              onChange={(e) =>
+                handleFileChange(e, setPromptContent, setPromptFileName, "prompt")
+              }
+            />
+            {promptFileName && (
+              <>
+
+<a
+  href={`data:text/plain;charset=utf-8,${encodeURIComponent(promptContent)}`}
+  download={promptFileName || "prompt.txt"}
+>
+  ⬇️ Tải lại prompt
+</a>
+                <button className="clear-button" onClick={handleClearPrompt}>
+                  🗑
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+     <button
+          className="compare-xml"
+          onClick={() => handleSubmit("twoAPI_2")}
+          disabled={loading}
+        >
+          {loading ? "⏳ Đang xử lý..." : "🚀 Ananazy"}
+        </button>
     </div>
   );
 }

@@ -8,7 +8,7 @@ function Sidebar() {
       <h3>Menu</h3>
       <ul>
 {/*         <li><Link to="/">Trang chủ</Link></li> */}
-        <li><Link to="/compare">So sánh</Link></li>
+        <li><Link to="/compare">Compare XML</Link></li>
 {/*         <li><Link to="/about">Giới thiệu</Link></li> */}
       </ul>
     </div>

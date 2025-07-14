@@ -1,7 +1,7 @@
 import sys
 
 from fastapi.responses import RedirectResponse
-from fastapi import Request, Header
+from fastapi import Request, Header,Form
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
@@ -104,8 +104,9 @@ async def compare_xml_by_gauss(
     request: Request,
     tablet_xml: Annotated[UploadFile, File(..., description="Tablet XML file")],
     phone_xml: Annotated[UploadFile, File(..., description="Phone XML file")],
-        prompt_txt: Annotated[Optional[UploadFile], File(description="Prompt txt file")] = None,
-        x_api_key: Optional[str] = Header(None)
+        # prompt_txt: Annotated[Optional[UploadFile], File(description="Prompt txt file")] = None,
+        prompt_txt: Annotated[Optional[str], Form(None)],
+    x_api_key: Optional[str] = Header(None)
 ):
     # ✅ Kiểm tra API key
     if x_api_key not in API_KEYS:
@@ -126,18 +127,21 @@ async def compare_xml_by_gauss(
     prompt_txt_content = ""
 
     if prompt_txt is not None:
-        if not prompt_txt.filename.endswith(".txt"):
-            raise HTTPException(status_code=400, detail="❌ prompt_txt phải là file .txt")
-        prompt_txt_content = (await prompt_txt.read()).decode("utf-8")
+        # if not prompt_txt.filename.endswith(".txt"):
+        #     raise HTTPException(status_code=400, detail="❌ prompt_txt phải là file .txt")
+        # prompt_txt_content = (await prompt_txt.read()).decode("utf-8")
+        print("Tablet XML snippet: >>> prompt_txt_content", "<<<")
+    else:
+        print("Tablet XML snippet: >>> Nones", "<<<")
     # ✅ Đọc nội dung file
     try:
         tablet_content = (await tablet_xml.read()).decode("utf-8")
         phone_content = (await phone_xml.read()).decode("utf-8")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"❌ Không thể đọc file: {str(e)}")
-
-    print("Tablet XML snippet: >>>", repr(tablet_content[:300]), "<<<")
-    print("Phone XML snippet: >>>", repr(phone_content[:300]), "<<<")
+    #
+    # print("Tablet XML snippet: >>>", repr(tablet_content[:300]), "<<<")
+    # print("Phone XML snippet: >>>", repr(phone_content[:300]), "<<<")
 
     # ✅ Gọi hàm xử lý AI
     try:
@@ -166,8 +170,8 @@ async def compare_xml_api(
     except Exception as e:
         print(f"Failed to read uploaded files: {str(e)}")
         raise HTTPException(status_code=400, detail=f"Failed to read uploaded files: {str(e)}")
-    print("Tablet XML snippet: >>>", repr(tablet_xml_str[:300]), "<<<")
-    print("Phone XML snippet: >>>", repr(phone_xml_str[:300]), "<<<")
+    # print("Tablet XML snippet: >>>", repr(tablet_xml_str[:300]), "<<<")
+    # print("Phone XML snippet: >>>", repr(phone_xml_str[:300]), "<<<")
 
     # Gọi hàm so sánh đã sửa để nhận string XML
     try:
