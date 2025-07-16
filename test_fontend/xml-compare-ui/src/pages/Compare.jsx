@@ -47,15 +47,26 @@ function Compare() {
 
       } else if (apiType === "twoAPI_2") {
         // Gọi song song
-        const [response_gauss, response_logic] = await Promise.all([
-          fetchWithRetry(url_gauss, formDataGauss, { headers }),
-          fetchWithRetry(url_logic_code, formDataLogic, { headers }),
-        ]);
+            let response_gauss = null;
+            let response_logic = null;
 
-        setResult({
-            gauss: response_gauss?.data.content ?? { error: "Không có dữ liệu từ Gauss API" },
-            logic: response_logic?.data ?? { error: "Không có dữ liệu từ Logic API" },
-        });
+            try {
+              response_gauss = await fetchWithRetry(url_gauss, formDataGauss, { headers });
+            } catch (err) {
+              console.error("Gauss API Error:", err);
+            }
+
+            try {
+              response_logic = await fetchWithRetry(url_logic_code, formDataLogic, { headers });
+            } catch (err) {
+              console.error("Logic API Error:", err);
+            }
+
+            setResult({
+              gauss: response_gauss?.data?.content ?? { error: "Không có dữ liệu từ Gauss API" },
+              logic: response_logic?.data ?? { error: "Không có dữ liệu từ Logic API" },
+            });
+
 
       } else {
         // Gọi một API
