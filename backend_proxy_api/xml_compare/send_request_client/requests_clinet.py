@@ -10,14 +10,17 @@ def call_compare_api_gauss(tablet_xml_path, phone_xml_path,prompt=""):
     files = {
         'tablet_xml': open(tablet_xml_path, 'rb'),
         'phone_xml': open(phone_xml_path, 'rb'),
-        'prompt_txt': open(prompt, 'rb'),
+    }
+    data = {
+        'prompt_txt': prompt  # gửi string thông qua Form field
     }
     try:
-        response = requests.post(url, headers=headers, files=files)
+        response = requests.post(url, headers=headers, files=files,data =data)
     finally:
         # Đóng file sau khi gửi (tránh leak file descriptor)
-        for f in files.values():
-            f.close()
+        # for f in files.values():
+        #     f.close()
+        print("a")
 
     if response.status_code == 200:
         print("✅ Kết quả:")
@@ -32,5 +35,5 @@ def call_compare_api_gauss(tablet_xml_path, phone_xml_path,prompt=""):
 
 phone_xml_path = "/Users/game/Desktop/chi/auto_app_update/backend_proxy_api/xml_compare/xml_file/window_dump_1.xml"
 tablet_xml_path= "/Users/game/Desktop/chi/auto_app_update/backend_proxy_api/xml_compare/xml_file/window_dump_1.xml"
-prompt="/Users/game/Desktop/chi/auto_app_update/backend_proxy_api/xml_compare/prompt/promt_v6.txt"
-call_compare_api_gauss(tablet_xml_path, phone_xml_path,prompt)
+prompt_str="Hi. How are you"
+call_compare_api_gauss(tablet_xml_path, phone_xml_path,prompt_str)

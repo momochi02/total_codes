@@ -3,6 +3,7 @@ import axios from "axios";
 import FileUpload from "../components/FilesUpdate/FileUploadForm";
 // import ResultBox from "../components/ResultBoxs/ResultBox";
 import Testrs from "../components/ResultBoxs/Testrs";
+import { fetchWithRetry } from "../utils/fetchWithRetry";
 function Compare() {
   const [result, setResult] = useState(null);
    const [loading, setLoading] = useState(false);
@@ -47,13 +48,13 @@ function Compare() {
       } else if (apiType === "twoAPI_2") {
         // Gọi song song
         const [response_gauss, response_logic] = await Promise.all([
-          axios.post(url_gauss, formDataGauss, { headers }),
-          axios.post(url_logic_code, formDataLogic, { headers }),
+          fetchWithRetry(url_gauss, formDataGauss, { headers }),
+          fetchWithRetry(url_logic_code, formDataLogic, { headers }),
         ]);
 
         setResult({
-          gauss: response_gauss.data,
-          logic: response_logic.data,
+            gauss: response_gauss?.data.content ?? { error: "Không có dữ liệu từ Gauss API" },
+            logic: response_logic?.data ?? { error: "Không có dữ liệu từ Logic API" },
         });
 
       } else {
@@ -84,7 +85,7 @@ function Compare() {
   return (
     <div>
       <h2>📄 So sánh XML</h2>
-      <FileUpload onCompare={handleCompare} loading={loading} />
+      <FileUpload onCompare={handleCompare} loading={loading} />;
 {/*       <FileUpload onCompare={handleCompare} /> */}
 {/*      <ResultBox result={result} /> */}
       <Testrs result={result} />

@@ -55,7 +55,18 @@ function Testrs({ result }) {
             marginTop: "10px",
           }}
         >
-          {data ? JSON.stringify(data, null, 2) : "⏳ ..."}
+
+              {
+                data?.error
+                  ? data.error                                 // Nếu có lỗi → in lỗi
+                  : data                                        // Nếu có dữ liệu
+                    ? (typeof data === "object" && data.content // Nếu là object và có .content
+                        ? data.content                          // → in content
+                        : JSON.stringify(data, null, 2))        // → in dạng JSON string
+                    : "⏳ Đang chờ kết quả..."                   // Nếu chưa có data
+              }
+
+
         </pre>
       </div>
     );

@@ -105,7 +105,7 @@ async def compare_xml_by_gauss(
     tablet_xml: Annotated[UploadFile, File(..., description="Tablet XML file")],
     phone_xml: Annotated[UploadFile, File(..., description="Phone XML file")],
         # prompt_txt: Annotated[Optional[UploadFile], File(description="Prompt txt file")] = None,
-        prompt_txt: Annotated[Optional[str], Form(None)],
+        prompt_txt: Annotated[Optional[str], Form()]= None,
     x_api_key: Optional[str] = Header(None)
 ):
     # ✅ Kiểm tra API key
@@ -127,6 +127,7 @@ async def compare_xml_by_gauss(
     prompt_txt_content = ""
 
     if prompt_txt is not None:
+        prompt_txt_content =prompt_txt
         # if not prompt_txt.filename.endswith(".txt"):
         #     raise HTTPException(status_code=400, detail="❌ prompt_txt phải là file .txt")
         # prompt_txt_content = (await prompt_txt.read()).decode("utf-8")

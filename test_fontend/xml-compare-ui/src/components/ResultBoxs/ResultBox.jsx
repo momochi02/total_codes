@@ -33,7 +33,15 @@ function ResultBox({ result }) {
         </div>
         {copied === title && <div className="copied-feedback">✅ Copied!</div>}
         <pre className="result-content">
-          {data ? JSON.stringify(data, null, 2) : "⏳ Đang chờ kết quả..."}
+              {
+                data?.error
+                  ? data.error                                 // Nếu có lỗi → in lỗi
+                  : data                                        // Nếu có dữ liệu
+                    ? (typeof data === "object" && data.content // Nếu là object và có .content
+                        ? data.content                          // → in content
+                        : JSON.stringify(data, null, 2))        // → in dạng JSON string
+                    : "⏳ Đang chờ kết quả..."                   // Nếu chưa có data
+              }
         </pre>
       </div>
     );
