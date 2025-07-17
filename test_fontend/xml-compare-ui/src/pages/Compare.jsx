@@ -62,10 +62,21 @@ function Compare() {
               console.error("Logic API Error:", err);
             }
 
+            const gaussResult =
+              response_gauss && response_gauss.status === 200
+                ? response_gauss.data?.content ?? { error: "Không có content từ Gauss API" }
+                : { error: "Gauss API trả về lỗi hoặc không phản hồi" };
+
+            const logicResult =
+              response_logic && response_logic.status === 200
+                ? response_logic.data ?? { error: "Không có dữ liệu từ Logic API" }
+                : { error: "Logic API trả về lỗi hoặc không phản hồi" };
+
             setResult({
-              gauss: response_gauss?.data?.content ?? { error: "Không có dữ liệu từ Gauss API" },
-              logic: response_logic?.data ?? { error: "Không có dữ liệu từ Logic API" },
+              gauss: gaussResult,
+              logic: logicResult,
             });
+
 
 
       } else {
